@@ -1,0 +1,27 @@
+pipeline {
+    agent any
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/example/repo.git'
+            }
+        }
+        stage('Dependency Scan') {
+            steps {
+                sh 'dependency-check.sh --project your-project --out reports/'
+            }
+        }
+        stage('Static Code Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh 'mvn sonar:sonar'
+                }
+            }
+        }
+        stage('Archive Report') {
+            steps {
+                archiveArtifacts artifacts: 'reports/**', fingerprint: true
+            }
+        }
+    }
+}
