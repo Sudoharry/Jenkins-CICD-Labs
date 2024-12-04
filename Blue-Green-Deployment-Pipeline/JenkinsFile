@@ -1,0 +1,25 @@
+pipeline {
+    agent any
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/example/repo.git'
+            }
+        }
+        stage('Build and Test') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
+        stage('Deploy to Green') {
+            steps {
+                sh 'ansible-playbook deploy-green.yml'
+            }
+        }
+        stage('Switch Traffic') {
+            steps {
+                sh 'ansible-playbook switch-traffic.yml'
+            }
+        }
+    }
+}
