@@ -1,0 +1,36 @@
+pipeline {
+    agent{
+    requirement {
+          DOCKER_IMAGE = 'your-repo/your-app:latest'
+    }
+    stages {
+       stage('Checkout'){
+           steps {
+              git url: 'https://github.com/example/repo.git'
+           }
+
+       stage('Build Docker Image') {
+           steps {
+              sh 'docker build -t $DOCKER_IMAGE .'
+           }
+       }
+
+       stage('Push to Registry') {
+            steps {
+                withCredentials([string(credentialsId: 'docker-hub-token', variable: 'DOCKER_HUB_TOKEN')]) {
+                    sh 'docker login -u your-username -p $DOCKER_HUB_TOKEN'
+                    sh 'docker push $DOCKER_IMAGE'
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh 'kubectl apply -f k8s/deployment.yaml'
+            }
+        }
+
+    
+    }
+    
+}
